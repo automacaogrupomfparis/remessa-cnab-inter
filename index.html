@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNAB 240 — Grupo MF Paris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── LOGIN ── */
+#login-screen {
+  position: fixed; inset: 0;
+  background: #eef1f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.login-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 2.5rem 2.25rem;
+  width: 340px;
+  text-align: center;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.10);
+}
+.login-card .brand {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: #1a2e7a; letter-spacing: 0.04em;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.login-card .sub {
+  font-size: 11px; letter-spacing: 0.18em;
+  color: #7a8bb0; text-transform: uppercase;
+  font-weight: 500; margin-bottom: 16px;
+}
+.login-card .divider {
+  width: 40px; height: 3px; background: #1a2e7a;
+  margin: 0 auto 1.5rem; border-radius: 2px;
+}
+.login-card .acesso { font-size: 13px; color: #9aa5bb; margin-bottom: 14px; }
+.login-card input {
+  width: 100%; border: 1.5px solid #dde3ef;
+  border-radius: 10px; padding: 13px 16px;
+  font-size: 15px; font-family: 'IBM Plex Sans', sans-serif;
+  color: #1a2e7a; outline: none; margin-bottom: 12px;
+  transition: border 0.2s;
+}
+.login-card input::placeholder { color: #b0bacc; }
+.login-card input:focus { border-color: #1a2e7a; }
+.login-card .btn-login {
+  width: 100%; background: #1a2e7a; color: #fff;
+  border: none; border-radius: 10px; padding: 14px;
+  font-size: 15px; font-weight: 600;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer; transition: background 0.15s;
+}
+.login-card .btn-login:hover { background: #243da0; }
+.login-err { font-size: 12px; color: #e05555; margin-top: 10px; display: none; }
+.login-err.show { display: block; }
+
+/* ── APP ── */
+:root {
+  --bg: #0f0f0f; --bg2: #181818; --bg3: #222222;
+  --border: #2e2e2e; --border2: #3a3a3a;
+  --accent: #e8a000; --accent2: #ffbe3c;
+  --text: #f0ede8; --text2: #9e9b95; --text3: #5e5c58;
+  --success: #3ecf8e; --danger: #ff5c5c;
+  --font: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --radius: 6px; --radius-lg: 10px;
+}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font); font-size: 14px;
+  min-height: 100vh; line-height: 1.6;
+}
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex;
+  align-items: center; gap: 1.5rem; height: 56px;
+}
+.logo { font-family: var(--mono); font-size: 13px; color: var(--accent); letter-spacing: 0.05em; font-weight: 500; }
+.logo span { color: var(--text3); }
+.header-badge {
+  font-size: 11px; font-family: var(--mono);
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text2); padding: 2px 8px; border-radius: 20px;
+}
+.inter-badge {
+  font-size: 11px; font-family: var(--mono);
+  color: var(--accent); border: 1px solid var(--accent);
+  padding: 2px 10px; border-radius: 20px; opacity: 0.7; margin-left: auto;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+.empresa-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
+.empresa-label {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap;
+}
+.empresa-btn {
+  background: var(--bg2); border: 1px solid var(--border);
+  color: var(--text2); padding: 8px 16px; border-radius: var(--radius);
+  font-family: var(--font); font-size: 13px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.empresa-btn:hover { border-color: var(--border2); color: var(--text); }
+.empresa-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+.empresa-btn.add-btn { border-style: dashed; font-size: 12px; color: var(--text3); }
+.empresa-btn.add-btn:hover { color: var(--accent); border-color: var(--accent); background: transparent; }
+.empresa-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem; display: flex; align-items: center;
+  gap: 1.5rem; flex-wrap: wrap;
+}
+.empresa-card .tag { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 2px; }
+.empresa-card .val { font-size: 13px; color: var(--text); font-weight: 500; }
+.empresa-card .sep { width: 1px; height: 32px; background: var(--border); }
+.seq-info { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 1.5rem; }
+.seq-info span { color: var(--accent); opacity: 0.8; }
+.section-title {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.upload-zone {
+  border: 1px dashed var(--border2); border-radius: var(--radius-lg);
+  padding: 2.5rem; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--bg2); position: relative; margin-bottom: 1rem;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: #1a1600; }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
+.upload-zone h3 { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.upload-zone p { font-size: 12px; color: var(--text3); }
+.upload-zone .cols { font-family: var(--mono); font-size: 11px; color: var(--accent); opacity: 0.7; margin-top: 10px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 1.5rem; display: none; }
+.table-wrap.visible { display: block; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--bg3); }
+thead th { padding: 10px 14px; text-align: left; font-family: var(--mono); font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg3); }
+tbody td { padding: 9px 14px; font-size: 13px; color: var(--text); white-space: nowrap; }
+td.mono { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+td.valor { font-family: var(--mono); font-size: 13px; color: var(--accent2); }
+td.ok { color: var(--success); font-size: 12px; }
+td.err-cell { color: var(--danger); font-size: 12px; }
+.badge-tipo { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 4px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); }
+.summary { display: none; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.summary.visible { display: grid; }
+.sum-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.sum-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.sum-card .num { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); }
+.sum-card.accent .num { color: var(--accent2); }
+.btn-gerar {
+  background: var(--accent); color: #000; border: none;
+  border-radius: var(--radius); padding: 12px 28px;
+  font-size: 14px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-gerar:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-gerar:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-clear {
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--text2); border-radius: var(--radius); padding: 12px 20px;
+  font-size: 13px; cursor: pointer; font-family: var(--font); transition: all 0.15s;
+}
+.btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+.template-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text3); cursor: pointer;
+  border: 1px solid var(--border); padding: 5px 12px;
+  border-radius: var(--radius); background: var(--bg2);
+  transition: all 0.15s; font-family: var(--mono);
+}
+.template-link:hover { color: var(--accent); border-color: var(--accent); }
+.actions-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.msg { padding: 12px 16px; border-radius: var(--radius); font-size: 13px; margin-top: 1rem; display: none; font-family: var(--mono); }
+.msg.ok { background: #0d2b1e; border: 1px solid #1a5c3a; color: var(--success); display: block; }
+.msg.err { background: #2b0d0d; border: 1px solid #5c1a1a; color: var(--danger); display: block; }
+footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; margin-top: 4rem; display: flex; align-items: center; justify-content: space-between; }
+footer .fl { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 1.5rem; width: 100%; max-width: 480px; position: relative; }
+.modal h2 { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; }
+.modal .field { margin-bottom: 12px; }
+.modal .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; font-family: var(--mono); }
+.modal .field input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); padding: 8px 12px; font-size: 13px; font-family: var(--font); outline: none; }
+.modal .field input:focus { border-color: var(--accent); }
+.modal .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; }
+.modal-close:hover { color: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="brand">Grupo MF Paris</div>
+    <div class="sub">Gerador CNAB 240 &middot; Pix</div>
+    <div class="divider"></div>
+    <div class="acesso">Acesso Restrito</div>
+    <input type="password" id="senha-input" placeholder="Digite a senha"
+           onkeydown="if(event.key==='Enter') fazerLogin()">
+    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+    <div class="login-err" id="login-err">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" style="display:none">
+
+<header>
+  <div class="logo">CNAB<span>/</span>240 <span>&middot;</span> PIX</div>
+  <div class="header-badge">Inter Empresas</div>
+  <div class="inter-badge">v1.21</div>
+</header>
+
+<div class="container">
+
+  <!-- EMPRESA SELECTOR -->
+  <div class="empresa-bar">
+    <span class="empresa-label">Empresa</span>
+    <div id="empresa-btns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    <button class="empresa-btn add-btn" onclick="openModal()">+ adicionar</button>
+  </div>
+
+  <!-- EMPRESA INFO -->
+  <div class="empresa-card">
+    <div><span class="tag">Razão Social</span><span class="val" id="info-nome">—</span></div>
+    <div class="sep"></div>
+    <div><span class="tag">CNPJ</span><span class="val" id="info-cnpj">—</span></div>
+    <div class="sep"></div>
+    <div><span class="tag">Conta Inter</span><span class="val" id="info-conta">—</span></div>
+  </div>
+
+  <!-- SEQ (somente leitura) -->
+  <div class="seq-info">próximo arquivo → <span id="seq-preview">CI240_001_0000001.REM</span></div>
+
+  <!-- UPLOAD -->
+  <div class="section-title">Planilha de pagamentos</div>
+  <div class="upload-zone" id="drop-zone">
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="importFile(event)">
+    <div class="upload-icon">📂</div>
+    <h3>Arraste sua planilha aqui ou clique para selecionar</h3>
+    <p>Formatos aceitos: .xlsx, .xls, .csv</p>
+    <div class="cols">nome_favorecido &middot; tipo_chave &middot; chave_pix &middot; cpf_cnpj_favorecido &middot; valor &middot; data_pagamento</div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <button class="template-link" onclick="baixarTemplate()">⬇ Baixar planilha modelo (.xlsx)</button>
+  </div>
+
+  <!-- SUMÁRIO -->
+  <div class="summary" id="summary">
+    <div class="sum-card"><div class="lbl">Pagamentos</div><div class="num" id="sum-qtd">0</div></div>
+    <div class="sum-card"><div class="lbl">Válidos</div><div class="num" id="sum-ok" style="color:var(--success)">0</div></div>
+    <div class="sum-card"><div class="lbl">Com erro</div><div class="num" id="sum-err">0</div></div>
+    <div class="sum-card accent"><div class="lbl">Total R$</div><div class="num" id="sum-total">0,00</div></div>
+  </div>
+
+  <!-- TABELA PREVIEW -->
+  <div class="table-wrap" id="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Favorecido</th><th>Tipo Chave</th>
+          <th>Chave Pix</th><th>CPF/CNPJ</th>
+          <th>Valor</th><th>Data</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- AÇÕES -->
+  <div class="actions-bar">
+    <button class="btn-gerar" id="btn-gerar" onclick="gerar()" disabled>⬇ Gerar arquivo CNAB 240</button>
+    <button class="btn-clear" onclick="limpar()">Limpar</button>
+  </div>
+  <div id="msg" class="msg"></div>
+
+</div><!-- /container -->
+
+<footer>
+  <span class="fl">CNAB 240 · Layout Inter Empresas v1.21 · Pix</span>
+  <span class="fl">processamento local · nenhum dado é enviado</span>
+</footer>
+
+</div><!-- /app -->
+
+<!-- MODAL ADICIONAR EMPRESA -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>Adicionar empresa</h2>
+    <div class="field"><label>Razão social</label><input id="m-nome" placeholder="EMPRESA LTDA"></div>
+    <div class="field"><label>CNPJ (só números)</label><input id="m-cnpj" placeholder="00000000000000" maxlength="14"></div>
+    <div class="field row2">
+      <div><label>Conta corrente Inter</label><input id="m-conta" placeholder="00000000"></div>
+      <div><label>Dígito verificador</label><input id="m-dv" placeholder="0" maxlength="1"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:1.25rem;">
+      <button class="btn-gerar" onclick="salvarEmpresa()">Salvar</button>
+      <button class="btn-clear" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// EMPRESAS
+// ─────────────────────────────────────────────────────────────────────────────
+const EMPRESAS_BASE = [
+  {
+    id: 'mfparis',
+    nome: 'MFPARIS INDUSTRIA DE ALIMENTOS LTDA',
+    cnpj: '26855558000142',
+    conta: '11022937', dv: '1',
+    rua: 'RUA BETA', numero: '378', bairro: 'VILA PARIS',
+    cidade: 'CONTAGEM', uf: 'MG', cep: '32372090'
+  },
+  {
+    id: 'profi',
+    nome: 'PROFI COMERCIO DE ALIMENTOS LTDA',
+    cnpj: '52139016000183',
+    conta: '398577668', dv: '1',
+    rua: 'RUA BETA', numero: '330', bairro: 'VILA PARIS',
+    cidade: 'CONTAGEM', uf: 'MG', cep: '32372090'
+  }
+];
+
+let empresas = [...EMPRESAS_BASE];
+let empresaAtiva = 0;
+let dadosImportados = [];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────────────────────────────────────
+function fazerLogin() {
+  const senha = document.getElementById('senha-input').value;
+  if (senha === 'gmf2026') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    sessionStorage.setItem('cnab_auth', '1');
+  } else {
+    document.getElementById('login-err').classList.add('show');
+    document.getElementById('senha-input').value = '';
+    document.getElementById('senha-input').focus();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEQUENCIAL AUTOMÁTICO (por empresa, salvo em localStorage)
+// ─────────────────────────────────────────────────────────────────────────────
+function seqKey() {
+  return 'cnab_seq_' + empresas[empresaAtiva].id;
+}
+function getSeq() {
+  return parseInt(localStorage.getItem(seqKey()) || '1');
+}
+function incrementarSeq() {
+  localStorage.setItem(seqKey(), String(getSeq() + 1));
+  atualizarSeqUI();
+}
+function atualizarSeqUI() {
+  const n = String(getSeq()).padStart(7, '0');
+  const el = document.getElementById('seq-preview');
+  if (el) el.textContent = 'CI240_001_' + n + '.REM';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+function init() {
+  // Verifica sessão ativa
+  if (sessionStorage.getItem('cnab_auth') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+
+  // Carrega empresas extras salvas
+  try {
+    const extras = JSON.parse(localStorage.getItem('cnab_empresas') || '[]');
+    extras.forEach(e => {
+      if (!empresas.find(x => x.cnpj === e.cnpj)) empresas.push(e);
+    });
+  } catch(e) {}
+
+  renderEmpresas();
+  selecionarEmpresa(0);
+
+  // Drag & drop
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag');
+    if (e.dataTransfer.files[0]) processarArquivo(e.dataTransfer.files[0]);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EMPRESAS UI
+// ─────────────────────────────────────────────────────────────────────────────
+function renderEmpresas() {
+  const wrap = document.getElementById('empresa-btns');
+  wrap.innerHTML = '';
+  empresas.forEach((e, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'empresa-btn' + (i === empresaAtiva ? ' active' : '');
+    // Mostra as 2 primeiras palavras do nome
+    btn.textContent = e.nome.split(' ').slice(0, 2).join(' ');
+    btn.title = e.nome;
+    btn.onclick = () => selecionarEmpresa(i);
+    wrap.appendChild(btn);
+  });
+}
+
+function selecionarEmpresa(i) {
+  empresaAtiva = i;
+  renderEmpresas();
+  const e = empresas[i];
+  document.getElementById('info-nome').textContent = e.nome;
+  document.getElementById('info-cnpj').textContent = formatarCNPJ(e.cnpj);
+  document.getElementById('info-conta').textContent = e.conta + '-' + e.dv;
+  atualizarSeqUI();
+}
+
+function formatarCNPJ(c) {
+  return c.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+}
+
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function salvarEmpresa() {
+  const nome = document.getElementById('m-nome').value.trim().toUpperCase();
+  const cnpj = document.getElementById('m-cnpj').value.replace(/\D/g, '');
+  const conta = document.getElementById('m-conta').value.replace(/\D/g, '');
+  const dv = document.getElementById('m-dv').value.trim();
+  if (!nome || !cnpj || !conta) { alert('Preencha todos os campos obrigatórios.'); return; }
+  const nova = { id: 'emp' + Date.now(), nome, cnpj, conta, dv: dv || '0', rua: '', numero: '0', bairro: '', cidade: '', uf: '', cep: '' };
+  empresas.push(nova);
+  // Salva apenas as extras (não as base)
+  const extras = empresas.filter(e => !EMPRESAS_BASE.find(b => b.cnpj === e.cnpj));
+  localStorage.setItem('cnab_empresas', JSON.stringify(extras));
+  renderEmpresas();
+  selecionarEmpresa(empresas.length - 1);
+  closeModal();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMPORTAR PLANILHA
+// ─────────────────────────────────────────────────────────────────────────────
+function importFile(e) {
+  if (e.target.files[0]) processarArquivo(e.target.files[0]);
+}
+
+function processarArquivo(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = ev => {
+    let rows = [];
+    if (ext === 'csv') {
+      const lines = ev.target.result.split(/\r?\n/).filter(l => l.trim());
+      if (!lines.length) return;
+      const sep = lines[0].includes(';') ? ';' : ',';
+      const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/["']/g, ''));
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(sep);
+        const obj = {};
+        headers.forEach((h, idx) => obj[h] = (vals[idx] || '').replace(/["']/g, '').trim());
+        if (Object.values(obj).some(v => v)) rows.push(obj);
+      }
+    } else {
+      const wb = XLSX.read(ev.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      rows = rows.map(r => {
+        const n = {};
+        Object.keys(r).forEach(k => n[k.toLowerCase().trim()] = String(r[k]).trim());
+        return n;
+      });
+    }
+    processarLinhas(rows);
+  };
+  if (ext === 'csv') reader.readAsText(file, 'UTF-8');
+  else reader.readAsArrayBuffer(file);
+}
+
+// Mapa de tipo de chave — aceita número (1,2,3,4,5) ou texto
+const TIPO_MAP = {
+  // por número
+  '1': '01', '2': '02', '3': '03', '4': '04', '5': '05',
+  '01': '01', '02': '02', '03': '03', '04': '04', '05': '05',
+  // por texto
+  'telefone': '01', 'phone': '01', 'tel': '01', 'celular': '01',
+  'email': '02', 'e-mail': '02', 'e_mail': '02',
+  'cpf_cnpj': '03', 'cpfcnpj': '03', 'cpf': '03', 'cnpj': '03', 'documento': '03',
+  'aleatoria': '04', 'aleatorio': '04', 'aleatório': '04', 'evp': '04', 'chave aleatoria': '04',
+  'dados_bancarios': '05', 'banco': '05', 'conta': '05', 'dados bancarios': '05'
+};
+
+const TIPO_LABEL = {
+  '01': 'Telefone', '02': 'E-mail',
+  '03': 'CPF/CNPJ', '04': 'Aleatória', '05': 'Dados bancários'
+};
+
+function processarLinhas(rows) {
+  dadosImportados = [];
+  let totalValor = 0, erros = 0;
+
+  for (const r of rows) {
+    const nome = (r.nome_favorecido || r.nome || '').toString().toUpperCase().trim();
+    const tipoRaw = (r.tipo_chave || r.tipo || '').toString().toLowerCase().trim();
+    const tipo = TIPO_MAP[tipoRaw] || '03';
+
+    // Chave: para tipo 03 (CPF/CNPJ), a chave É o próprio CPF/CNPJ
+    let chave = (r.chave_pix || r.chave || '').toString().trim();
+    const doc = (r.cpf_cnpj_favorecido || r.cpf_cnpj || r.cpf || r.cnpj || '').toString().replace(/\D/g, '');
+
+    // Se tipo 03 e chave_pix vazia, usa o doc como chave
+    if (tipo === '03' && !chave && doc) chave = doc;
+
+    const valorRaw = (r.valor || '0').toString().replace(/[^\d,\.]/g, '').replace(',', '.');
+    const valor = parseFloat(valorRaw) || 0;
+
+    const dataRaw = (r.data_pagamento || r.data || '').toString().replace(/\D/g, '');
+    const data = dataRaw.length === 8 ? dataRaw : hojeFormatado();
+
+    const ref = (r.referencia || r.ref || r.numero || '').toString().trim().substring(0, 20);
+
+    let erro = '';
+    if (!nome) erro = 'Nome ausente';
+    else if (!chave && tipo !== '05') erro = 'Chave Pix ausente';
+    else if (valor <= 0) erro = 'Valor inválido';
+
+    if (!erro) totalValor += valor; else erros++;
+    if (nome || chave || doc) dadosImportados.push({ nome, tipo, chave, doc, valor, data, ref, erro });
+  }
+
+  renderTabela();
+  renderSumario(totalValor, erros);
+  document.getElementById('btn-gerar').disabled = dadosImportados.filter(d => !d.erro).length === 0;
+}
+
+function renderTabela() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  dadosImportados.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="mono">${i + 1}</td>
+      <td>${d.nome || '—'}</td>
+      <td><span class="badge-tipo">${TIPO_LABEL[d.tipo] || d.tipo}</span></td>
+      <td class="mono">${d.chave || '—'}</td>
+      <td class="mono">${formatarDoc(d.doc)}</td>
+      <td class="valor">R$ ${d.valor.toFixed(2).replace('.', ',')}</td>
+      <td class="mono">${formatarData(d.data)}</td>
+      <td class="${d.erro ? 'err-cell' : 'ok'}">${d.erro || '✓'}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('table-wrap').classList.add('visible');
+}
+
+function renderSumario(total, erros) {
+  const qtd = dadosImportados.length;
+  document.getElementById('sum-qtd').textContent = qtd;
+  document.getElementById('sum-ok').textContent = qtd - erros;
+  document.getElementById('sum-err').textContent = erros;
+  document.getElementById('sum-total').textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  document.getElementById('summary').classList.add('visible');
+}
+
+function formatarDoc(d) {
+  if (!d) return '—';
+  if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  return d;
+}
+function formatarData(d) {
+  if (!d || d.length !== 8) return d || '—';
+  return d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4, 8);
+}
+function hojeFormatado() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GERAR CNAB 240
+// ─────────────────────────────────────────────────────────────────────────────
+function alfa(str, tam) { return String(str || '').padEnd(tam, ' ').substring(0, tam); }
+function num(str, tam)  { return String(str || '').replace(/\D/g, '').padStart(tam, '0').slice(-tam); }
+function numVal(val, tam) {
+  const n = Math.round(parseFloat(val || 0) * 100);
+  return String(n).padStart(tam, '0').slice(-tam);
+}
+
+function gerar() {
+  const emp = empresas[empresaAtiva];
+  const pagamentos = dadosImportados.filter(d => !d.erro);
+
+  if (pagamentos.length === 0) { showMsg('Nenhum pagamento válido para gerar.', 'err'); return; }
+
+  const seqN = String(getSeq()).padStart(7, '0');
+  const hoje = hojeFormatado();
+  const agora = new Date();
+  const hora = String(agora.getHours()).padStart(2,'0') + String(agora.getMinutes()).padStart(2,'0') + String(agora.getSeconds()).padStart(2,'0');
+  const linhas = [];
+  const lote = '0001';
+
+  // ── HEADER ARQUIVO ──
+  let h = '';
+  h += '077';
+  h += '0000';
+  h += '0';
+  h += ' '.repeat(9);
+  h += '2';
+  h += emp.cnpj.padStart(14, ' ');
+  h += ' '.repeat(20);
+  h += '00001';
+  h += '9';
+  h += emp.conta.padStart(12, '0');
+  h += emp.dv.padStart(1, '0');
+  h += ' ';
+  h += alfa(emp.nome, 30);
+  h += alfa('BANCO INTER', 30);
+  h += ' '.repeat(10);
+  h += '1';
+  h += hoje;
+  h += hora;
+  h += seqN.substring(0, 6).padStart(6, '0');
+  h += '107';
+  h += '01600';
+  h += ' '.repeat(20);
+  h += ' '.repeat(20);
+  h += ' '.repeat(29);
+  linhas.push(h);
+
+  // ── HEADER LOTE ──
+  let hl = '';
+  hl += '077';
+  hl += lote;
+  hl += '1';
+  hl += 'C';
+  hl += '20';
+  hl += '45';
+  hl += '046';
+  hl += ' ';
+  hl += '2';
+  hl += emp.cnpj.padStart(14, ' ');
+  hl += ' '.repeat(20);
+  hl += '00001';
+  hl += '9';
+  hl += emp.conta.padStart(12, '0');
+  hl += emp.dv.padStart(1, '0');
+  hl += ' ';
+  hl += alfa(emp.nome, 30);
+  hl += alfa('', 40);
+  hl += alfa(emp.rua || '', 30);
+  hl += String(emp.numero || '0').padStart(5, '0').substring(0, 5);
+  hl += alfa(emp.bairro || '', 15);
+  hl += alfa(emp.cidade || '', 20);
+  hl += String((emp.cep || '').replace(/\D/g, '')).padStart(5, '0').substring(0, 5);
+  hl += String((emp.cep || '').replace(/\D/g, '')).substring(5).padEnd(3, ' ').substring(0, 3);
+  hl += alfa(emp.uf || '', 2);
+  hl += ' '.repeat(8);
+  hl += ' '.repeat(10);
+  linhas.push(hl);
+
+  let totalValor = 0;
+  let seqDet = 0;
+
+  for (const p of pagamentos) {
+    totalValor += Math.round(parseFloat(p.valor || 0) * 100);
+
+    // ── SEGMENTO A ──
+    seqDet++;
+    let sa = '';
+    sa += '077';
+    sa += lote;
+    sa += '3';
+    sa += String(seqDet).padStart(5, '0');
+    sa += 'A';
+    sa += '0';
+    sa += '00';
+    sa += '000';
+    sa += '000';           // banco favorecido
+    sa += '00000';         // agência
+    sa += '0';             // dv agência
+    sa += '0'.repeat(12);  // conta
+    sa += '0';             // dv conta
+    sa += ' ';
+    sa += alfa(p.tipo === '05' ? p.nome : '', 30);
+    sa += alfa(p.ref || '', 20);
+    sa += (p.data || hoje).padEnd(8, '0').substring(0, 8);
+    sa += 'BRL';
+    sa += '0'.repeat(15);
+    sa += numVal(p.valor, 15);
+    sa += ' '.repeat(20);
+    sa += '0'.repeat(8);
+    sa += '0'.repeat(15);
+    sa += (p.doc || '').replace(/\D/g, '').padStart(14, '0').substring(0, 14);
+    sa += '0'.repeat(8);   // ISPB
+    sa += '01';            // tipo conta corrente
+    sa += ' '.repeat(29);
+    sa += ' '.repeat(10);
+    linhas.push(sa);
+
+    // ── SEGMENTO B ──
+    seqDet++;
+    let sb = '';
+    sb += '077';
+    sb += lote;
+    sb += '3';
+    sb += String(seqDet).padStart(5, '0');
+    sb += 'B';
+    sb += (p.tipo || '03').padStart(3, ' ');  // forma de iniciação
+    sb += (p.doc || '').replace(/\D/g, '').length <= 11 ? '1' : '2';
+    sb += (p.doc || '').replace(/\D/g, '').padStart(14, '0').substring(0, 14);
+    sb += ' '.repeat(35);  // TX ID opcional
+    sb += ' '.repeat(60);  // branco
+    // Chave Pix (99 chars) — preenche para telefone, email e aleatória
+    if (['01', '02', '04'].includes(p.tipo)) {
+      sb += alfa(p.chave || '', 99);
+    } else if (p.tipo === '03') {
+      // CPF/CNPJ como chave: vai no campo chave também
+      sb += alfa(p.chave || '', 99);
+    } else {
+      sb += ' '.repeat(99);
+    }
+    sb += ' '.repeat(6);
+    sb += '0'.repeat(8);   // ISPB favorecido
+    linhas.push(sb);
+  }
+
+  // ── TRAILER LOTE ──
+  let tl = '';
+  tl += '077';
+  tl += lote;
+  tl += '5';
+  tl += ' '.repeat(9);
+  tl += String(seqDet + 2).padStart(6, '0');
+  tl += String(totalValor).padStart(18, '0');
+  tl += '0'.repeat(18);
+  tl += ' '.repeat(6);
+  tl += ' '.repeat(165);
+  tl += ' '.repeat(10);
+  linhas.push(tl);
+
+  // ── TRAILER ARQUIVO ──
+  let ta = '';
+  ta += '077';
+  ta += '9999';
+  ta += '9';
+  ta += ' '.repeat(9);
+  ta += '000001';
+  ta += String(linhas.length + 1).padStart(6, '0');
+  ta += ' '.repeat(211);
+  linhas.push(ta);
+
+  // Validação
+  const invalidas = linhas.filter(l => l.length !== 240);
+  if (invalidas.length) {
+    showMsg('Erro interno: ' + invalidas.length + ' linha(s) com tamanho incorreto.', 'err');
+    console.error(invalidas.map((l, i) => 'L' + i + ': ' + l.length + ' chars — ' + l));
+    return;
+  }
+
+  const nomeArq = 'CI240_001_' + seqN + '.REM';
+  const conteudo = linhas.join('\r\n') + '\r\n';
+  downloadTxt(conteudo, nomeArq);
+
+  const totalFmt = (totalValor / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  showMsg('✓ ' + nomeArq + ' gerado com ' + pagamentos.length + ' pagamento(s) — total R$ ' + totalFmt, 'ok');
+
+  incrementarSeq();
+}
+
+function downloadTxt(texto, nome) {
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nome; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function showMsg(txt, tipo) {
+  const el = document.getElementById('msg');
+  el.textContent = txt;
+  el.className = 'msg ' + tipo;
+}
+
+function limpar() {
+  dadosImportados = [];
+  document.getElementById('tbody').innerHTML = '';
+  document.getElementById('table-wrap').classList.remove('visible');
+  document.getElementById('summary').classList.remove('visible');
+  document.getElementById('btn-gerar').disabled = true;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('msg').className = 'msg';
+}
+
+function baixarTemplate() {
+  const headers = ['nome_favorecido', 'tipo_chave', 'chave_pix', 'cpf_cnpj_favorecido', 'valor', 'data_pagamento', 'referencia'];
+  const exemplos = [
+    ['JOAO DA SILVA',   'email',           'joao@email.com',                      '12345678901',    '150.00',  '03062026', 'REF001'],
+    ['MARIA LTDA',      'cpf_cnpj',        '12345678000195',                      '12345678000195', '2500.00', '03062026', 'REF002'],
+    ['PEDRO SOUZA',     'telefone',        '+5531999990000',                      '98765432100',    '80.50',   '04062026', 'REF003'],
+    ['LUCAS TECH',      'aleatoria',       'a1b2c3d4-e5f6-7890-abcd-ef1234567890','11223344556',    '320.00',  '04062026', 'REF004'],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...exemplos]);
+  ws['!cols'] = headers.map(() => ({ wch: 40 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Pagamentos');
+  XLSX.writeFile(wb, 'modelo_pagamentos_pix.xlsx');
+}
+
+// Inicia
+init();
+</script>
+</body>
+</html>
