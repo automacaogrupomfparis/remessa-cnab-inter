@@ -1,820 +1,213 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CNAB 240 — Grupo MF Paris</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Grupo MF Paris – Tabela de Preços</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'IBM Plex Sans', sans-serif; background: #0f0f0f; color: #f0ede8; font-size: 14px; line-height: 1.6; }
-
-/* ═══ LOGIN ═══════════════════════════════════════════════════════════════ */
-#tela-login {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #eef1f8;
-  display: flex; align-items: center; justify-content: center;
+:root{
+  --azul:#0f2d8a;
+  --azul2:#1a45c8;
+  --vermelho:#c0392b;
+  --bg:#edf1f9;
+  --card:#fff;
+  --borda:#d4daea;
+  --texto:#1b2340;
+  --mudo:#6b7a99;
+  --r:18px;
+  --sombra:0 6px 32px rgba(15,45,138,.12);
 }
-.login-card {
-  background: #fff; border-radius: 18px;
-  padding: 2.5rem 2.25rem; width: 340px;
-  text-align: center; box-shadow: 0 4px 40px rgba(0,0,0,0.12);
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+
+#login{background:var(--card);border-radius:var(--r);box-shadow:var(--sombra);padding:44px 40px 40px;width:100%;max-width:400px;text-align:center}
+.marca{margin-bottom:28px}
+.marca-nome{font-family:'Montserrat',sans-serif;font-size:1.5rem;font-weight:900;color:var(--azul);letter-spacing:.08em}
+.marca-sub{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;color:var(--mudo);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+.divisor{width:40px;height:3px;background:var(--azul);border-radius:2px;margin:14px auto 0}
+#login h2{font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:400;color:var(--mudo);margin-bottom:22px}
+#login input[type=password]{width:100%;padding:13px 16px;border:2px solid var(--borda);border-radius:10px;font-size:1rem;font-family:'Inter',sans-serif;color:var(--texto);outline:none;transition:border-color .2s;margin-bottom:14px;letter-spacing:3px}
+#login input[type=password]:focus{border-color:var(--azul2)}
+#login button{width:100%;padding:14px;background:var(--azul);color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:background .2s}
+#login button:hover{background:var(--azul2)}
+#erroLogin{color:var(--vermelho);font-size:.85rem;margin-top:10px;display:none}
+
+#app{display:none;width:100%;max-width:520px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sombra);padding:36px 32px 32px}
+.topo{text-align:center;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--borda)}
+.topo .marca-nome{font-size:1.3rem}
+.topo .divisor{margin-top:10px}
+
+.campo{margin-bottom:18px}
+.campo label,.linha-dupla label{display:block;font-size:.73rem;font-weight:700;color:var(--mudo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.linha-dupla{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+select{width:100%;padding:12px 38px 12px 14px;border:2px solid var(--borda);border-radius:10px;font-size:.95rem;font-family:'Inter',sans-serif;color:var(--texto);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7a99' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;transition:border-color .2s}
+select:focus{border-color:var(--azul2)}
+
+#resultado{margin-top:22px;display:none}
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.caixa{border:2.5px solid var(--azul);border-radius:14px;padding:22px 16px;text-align:center;background:#f6f8ff}
+.caixa.b{border-color:var(--vermelho);background:#fff7f6}
+.caixa .rotulo{font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.14em;color:var(--mudo);text-transform:uppercase;margin-bottom:10px}
+.caixa .preco{font-family:'Montserrat',sans-serif;font-size:2rem;font-weight:900;color:var(--texto);line-height:1;margin-bottom:10px}
+.badge{display:inline-block;font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:20px;background:#dde6ff;color:var(--azul);margin-bottom:3px}
+.caixa.b .badge{background:#ffe2df;color:var(--vermelho)}
+.leg{font-size:.72rem;color:var(--mudo)}
+
+.sair{display:block;margin:16px auto 0;background:none;border:none;color:var(--mudo);font-size:.78rem;cursor:pointer;text-decoration:underline}
+.sair:hover{color:var(--vermelho)}
+
+@media(max-width:400px){
+  .card{padding:24px 14px}
+  .linha-dupla{grid-template-columns:1fr}
+  .caixa .preco{font-size:1.6rem}
+  #login{padding:36px 20px 30px}
 }
-.login-brand {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 22px; font-weight: 800;
-  color: #1a2e7a; letter-spacing: 0.04em;
-  text-transform: uppercase; margin-bottom: 4px;
-}
-.login-sub {
-  font-size: 11px; letter-spacing: 0.16em;
-  color: #7a8bb0; text-transform: uppercase;
-  font-weight: 500; margin-bottom: 16px;
-}
-.login-divider {
-  width: 40px; height: 3px; background: #1a2e7a;
-  border-radius: 2px; margin: 0 auto 1.5rem;
-}
-.login-label { font-size: 13px; color: #9aa5bb; margin-bottom: 14px; }
-.login-card input[type="password"] {
-  display: block; width: 100%;
-  border: 1.5px solid #dde3ef; border-radius: 10px;
-  padding: 13px 16px; font-size: 15px;
-  font-family: 'IBM Plex Sans', sans-serif;
-  color: #1a2e7a; outline: none; margin-bottom: 12px;
-  transition: border-color 0.2s;
-}
-.login-card input[type="password"]:focus { border-color: #1a2e7a; }
-.login-card input[type="password"]::placeholder { color: #b0bacc; }
-.login-btn {
-  display: block; width: 100%;
-  background: #1a2e7a; color: #fff;
-  border: none; border-radius: 10px;
-  padding: 14px; font-size: 15px; font-weight: 600;
-  font-family: 'IBM Plex Sans', sans-serif;
-  cursor: pointer; transition: background 0.15s;
-}
-.login-btn:hover { background: #243da0; }
-.login-erro {
-  margin-top: 10px; font-size: 12px;
-  color: #e05555; display: none;
-}
-.login-erro.visivel { display: block; }
-
-/* ═══ APP ═════════════════════════════════════════════════════════════════ */
-#app { display: none; }
-
-header {
-  border-bottom: 1px solid #2e2e2e;
-  padding: 0 2rem; height: 56px;
-  display: flex; align-items: center; gap: 1.5rem;
-}
-.logo { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #e8a000; letter-spacing: 0.05em; }
-.logo em { color: #5e5c58; font-style: normal; }
-.badge { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: #222; border: 1px solid #3a3a3a; color: #9e9b95; padding: 2px 8px; border-radius: 20px; }
-.badge-inter { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #e8a000; border: 1px solid #e8a000; padding: 2px 10px; border-radius: 20px; opacity: 0.7; margin-left: auto; }
-
-.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
-
-/* empresa selector */
-.empresa-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
-.empresa-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5e5c58; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
-.emp-btn {
-  background: #181818; border: 1px solid #2e2e2e;
-  color: #9e9b95; padding: 8px 16px; border-radius: 6px;
-  font-family: 'IBM Plex Sans', sans-serif; font-size: 13px;
-  cursor: pointer; transition: all 0.15s; white-space: nowrap;
-}
-.emp-btn:hover { border-color: #3a3a3a; color: #f0ede8; }
-.emp-btn.ativo { background: #e8a000; border-color: #e8a000; color: #000; font-weight: 600; }
-.emp-btn.novo { border-style: dashed; font-size: 12px; color: #5e5c58; }
-.emp-btn.novo:hover { color: #e8a000; border-color: #e8a000; background: transparent; }
-
-/* info card */
-.info-card {
-  background: #181818; border: 1px solid #2e2e2e; border-radius: 10px;
-  padding: 1rem 1.25rem; margin-bottom: 1.5rem;
-  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
-}
-.info-item .tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5e5c58; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 2px; }
-.info-item .val { font-size: 13px; color: #f0ede8; font-weight: 500; }
-.info-sep { width: 1px; height: 32px; background: #2e2e2e; }
-
-/* seq */
-.seq-linha { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5e5c58; margin-bottom: 1.5rem; }
-.seq-linha span { color: #e8a000; opacity: 0.8; }
-
-/* section title */
-.sec-titulo { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5e5c58; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.sec-titulo::after { content: ''; flex: 1; height: 1px; background: #2e2e2e; }
-
-/* upload */
-.upload-zona {
-  border: 1px dashed #3a3a3a; border-radius: 10px;
-  padding: 2.5rem; text-align: center; cursor: pointer;
-  transition: all 0.2s; background: #181818;
-  position: relative; margin-bottom: 1rem;
-}
-.upload-zona:hover, .upload-zona.arrastando { border-color: #e8a000; background: #1a1600; }
-.upload-zona input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.upload-icone { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
-.upload-zona h3 { font-size: 15px; font-weight: 500; color: #f0ede8; margin-bottom: 4px; }
-.upload-zona p { font-size: 12px; color: #5e5c58; }
-.upload-cols { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #e8a000; opacity: 0.7; margin-top: 10px; }
-
-/* botão template */
-.btn-template {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; color: #5e5c58; cursor: pointer;
-  border: 1px solid #2e2e2e; padding: 5px 12px;
-  border-radius: 6px; background: #181818;
-  transition: all 0.15s; font-family: 'IBM Plex Mono', monospace;
-  margin-bottom: 1.5rem;
-}
-.btn-template:hover { color: #e8a000; border-color: #e8a000; }
-
-/* resumo */
-.resumo { display: none; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-.resumo.visivel { display: grid; }
-.resumo-card { background: #181818; border: 1px solid #2e2e2e; border-radius: 6px; padding: 12px 14px; }
-.resumo-card .lbl { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5e5c58; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-.resumo-card .num { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500; color: #f0ede8; }
-
-/* tabela */
-.tabela-wrap { overflow-x: auto; border: 1px solid #2e2e2e; border-radius: 10px; margin-bottom: 1.5rem; display: none; }
-.tabela-wrap.visivel { display: block; }
-table { width: 100%; border-collapse: collapse; }
-thead { background: #222; }
-thead th { padding: 10px 14px; text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5e5c58; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #2e2e2e; white-space: nowrap; }
-tbody tr { border-bottom: 1px solid #2e2e2e; transition: background 0.1s; }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: #222; }
-tbody td { padding: 9px 14px; font-size: 13px; white-space: nowrap; }
-.td-mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #9e9b95; }
-.td-valor { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #ffbe3c; }
-.td-ok { color: #3ecf8e; font-size: 12px; }
-.td-erro { color: #ff5c5c; font-size: 12px; }
-.tipo-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 4px; background: #222; border: 1px solid #3a3a3a; color: #9e9b95; }
-
-/* botões ação */
-.acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.btn-gerar {
-  background: #e8a000; color: #000; border: none; border-radius: 6px;
-  padding: 12px 28px; font-size: 14px; font-weight: 600;
-  font-family: 'IBM Plex Sans', sans-serif; cursor: pointer;
-  transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px;
-}
-.btn-gerar:hover { background: #ffbe3c; transform: translateY(-1px); }
-.btn-gerar:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.btn-limpar {
-  background: transparent; border: 1px solid #3a3a3a; color: #9e9b95;
-  border-radius: 6px; padding: 12px 20px; font-size: 13px;
-  cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; transition: all 0.15s;
-}
-.btn-limpar:hover { border-color: #ff5c5c; color: #ff5c5c; }
-
-/* mensagem */
-.msg { padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-top: 1rem; font-family: 'IBM Plex Mono', monospace; display: none; }
-.msg.ok  { background: #0d2b1e; border: 1px solid #1a5c3a; color: #3ecf8e; display: block; }
-.msg.err { background: #2b0d0d; border: 1px solid #5c1a1a; color: #ff5c5c; display: block; }
-
-footer { border-top: 1px solid #2e2e2e; padding: 1.25rem 2rem; margin-top: 4rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-footer span { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5e5c58; }
-
-/* modal */
-.modal-fundo { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 500; }
-.modal-fundo.aberto { display: flex; }
-.modal { background: #181818; border: 1px solid #3a3a3a; border-radius: 10px; padding: 1.5rem; width: 100%; max-width: 460px; position: relative; }
-.modal h2 { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; color: #f0ede8; }
-.modal-fechar { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #5e5c58; font-size: 18px; cursor: pointer; }
-.modal-fechar:hover { color: #ff5c5c; }
-.campo { margin-bottom: 12px; }
-.campo label { display: block; font-size: 12px; color: #9e9b95; margin-bottom: 4px; font-family: 'IBM Plex Mono', monospace; }
-.campo input { width: 100%; background: #222; border: 1px solid #2e2e2e; border-radius: 6px; color: #f0ede8; padding: 8px 12px; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; outline: none; }
-.campo input:focus { border-color: #e8a000; }
-.campo-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 </style>
 </head>
 <body>
 
-<!-- ═══ TELA DE LOGIN ═══════════════════════════════════════════════════════ -->
-<div id="tela-login">
-  <div class="login-card">
-    <div class="login-brand">Grupo MF Paris</div>
-    <div class="login-sub">Gerador CNAB 240 &middot; Pix</div>
-    <div class="login-divider"></div>
-    <div class="login-label">Acesso Restrito</div>
-    <input type="password" id="campo-senha" placeholder="Digite a senha"
-           onkeydown="if(event.key==='Enter') entrar()">
-    <button class="login-btn" onclick="entrar()">Entrar</button>
-    <div class="login-erro" id="login-erro">Senha incorreta. Tente novamente.</div>
+<div id="login">
+  <div class="marca">
+    <div class="marca-nome">GRUPO MF PARIS</div>
+    <div class="marca-sub">Tabela de Preços</div>
+    <div class="divisor"></div>
   </div>
+  <h2>Acesso Restrito</h2>
+  <input type="password" id="senha" placeholder="Digite a senha" onkeydown="if(event.key==='Enter')entrar()"/>
+  <button onclick="entrar()">Entrar</button>
+  <p id="erroLogin">Senha incorreta. Tente novamente.</p>
 </div>
 
-<!-- ═══ APP ═══════════════════════════════════════════════════════════════== -->
 <div id="app">
-
-  <header>
-    <span class="logo">CNAB<em>/</em>240 <em>&middot;</em> PIX</span>
-    <span class="badge">Inter Empresas</span>
-    <span class="badge-inter">v1.21</span>
-  </header>
-
-  <div class="container">
-
-    <!-- Seletor de empresa -->
-    <div class="empresa-bar">
-      <span class="empresa-label">Empresa</span>
-      <div id="btns-empresa" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-      <button class="emp-btn novo" onclick="abrirModal()">+ adicionar</button>
+  <div class="card">
+    <div class="topo">
+      <div class="marca-nome">GRUPO MF PARIS</div>
+      <div class="divisor"></div>
     </div>
 
-    <!-- Info da empresa -->
-    <div class="info-card">
-      <div class="info-item"><span class="tag">Razão Social</span><span class="val" id="info-nome">—</span></div>
-      <div class="info-sep"></div>
-      <div class="info-item"><span class="tag">CNPJ</span><span class="val" id="info-cnpj">—</span></div>
-      <div class="info-sep"></div>
-      <div class="info-item"><span class="tag">Conta Inter</span><span class="val" id="info-conta">—</span></div>
+    <div class="campo">
+      <label>Produto</label>
+      <select id="produto" onchange="calcular()">
+        <option value="">Selecione o produto…</option>
+      </select>
     </div>
 
-    <!-- Sequencial automático -->
-    <div class="seq-linha">próximo arquivo &rarr; <span id="seq-preview">CI240_001_0000001.REM</span></div>
-
-    <!-- Upload -->
-    <div class="sec-titulo">Planilha de pagamentos</div>
-    <div class="upload-zona" id="zona-upload">
-      <input type="file" id="input-arquivo" accept=".xlsx,.xls,.csv" onchange="aoSelecionarArquivo(event)">
-      <div class="upload-icone">📂</div>
-      <h3>Arraste sua planilha aqui ou clique para selecionar</h3>
-      <p>Formatos aceitos: .xlsx, .xls, .csv</p>
-      <div class="upload-cols">nome_favorecido &middot; tipo_chave &middot; chave_pix &middot; cpf_cnpj_favorecido &middot; valor &middot; data_pagamento</div>
+    <div class="linha-dupla">
+      <div>
+        <label>Prazo de pagamento</label>
+        <select id="prazo" onchange="calcular()">
+          <option value="">Selecione…</option>
+        </select>
+      </div>
+      <div>
+        <label>Frete</label>
+        <select id="frete" onchange="calcular()">
+          <option value="">Selecione…</option>
+        </select>
+      </div>
     </div>
 
-    <button class="btn-template" onclick="baixarModelo()">⬇ Baixar planilha modelo (.xlsx)</button>
-
-    <!-- Resumo -->
-    <div class="resumo" id="resumo">
-      <div class="resumo-card"><div class="lbl">Pagamentos</div><div class="num" id="r-total">0</div></div>
-      <div class="resumo-card"><div class="lbl">Válidos</div><div class="num" id="r-ok" style="color:#3ecf8e">0</div></div>
-      <div class="resumo-card"><div class="lbl">Com erro</div><div class="num" id="r-erro" style="color:#ff5c5c">0</div></div>
-      <div class="resumo-card"><div class="lbl">Total R$</div><div class="num" id="r-valor" style="color:#ffbe3c">0,00</div></div>
-    </div>
-
-    <!-- Tabela preview -->
-    <div class="tabela-wrap" id="tabela-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Favorecido</th><th>Tipo Chave</th>
-            <th>Chave Pix</th><th>CPF/CNPJ</th>
-            <th>Valor</th><th>Data</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-corpo"></tbody>
-      </table>
-    </div>
-
-    <!-- Ações -->
-    <div class="acoes">
-      <button class="btn-gerar" id="btn-gerar" onclick="gerarCNAB()" disabled>⬇ Gerar arquivo CNAB 240</button>
-      <button class="btn-limpar" onclick="limpar()">Limpar</button>
-    </div>
-    <div class="msg" id="msg"></div>
-
-  </div><!-- /container -->
-
-  <footer>
-    <span>CNAB 240 · Layout Inter Empresas v1.21 · Pix</span>
-    <span>processamento local · nenhum dado é enviado</span>
-  </footer>
-
-</div><!-- /app -->
-
-<!-- Modal adicionar empresa -->
-<div class="modal-fundo" id="modal">
-  <div class="modal">
-    <button class="modal-fechar" onclick="fecharModal()">✕</button>
-    <h2>Adicionar empresa</h2>
-    <div class="campo"><label>Razão social</label><input id="m-nome" placeholder="EMPRESA LTDA"></div>
-    <div class="campo"><label>CNPJ (só números)</label><input id="m-cnpj" placeholder="00000000000000" maxlength="14"></div>
-    <div class="campo campo-2col">
-      <div><label>Conta Inter</label><input id="m-conta" placeholder="00000000"></div>
-      <div><label>Dígito verificador</label><input id="m-dv" placeholder="0" maxlength="2"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:1.25rem;">
-      <button class="btn-gerar" onclick="salvarEmpresa()">Salvar</button>
-      <button class="btn-limpar" onclick="fecharModal()">Cancelar</button>
+    <div id="resultado">
+      <div class="grade">
+        <div class="caixa a">
+          <div class="rotulo">Tabela A</div>
+          <div class="preco" id="precoA">—</div>
+          <div class="badge" id="comA">—</div>
+          <div class="leg">sua comissão</div>
+        </div>
+        <div class="caixa b">
+          <div class="rotulo">Tabela B</div>
+          <div class="preco" id="precoB">—</div>
+          <div class="badge" id="comB">—</div>
+          <div class="leg">sua comissão</div>
+        </div>
+      </div>
     </div>
   </div>
+  <button class="sair" onclick="sair()">Sair</button>
 </div>
 
 <script>
-'use strict';
+const SENHA = 'gmf2026';
 
-// ═══════════════════════════════════════════════════════════════════════════
-// DADOS DAS EMPRESAS
-// ═══════════════════════════════════════════════════════════════════════════
-const EMPRESAS_FIXAS = [
-  {
-    id: 'mfparis',
-    nome: 'MFPARIS INDUSTRIA DE ALIMENTOS LTDA',
-    cnpj: '26855558000142',
-    conta: '11022937', dv: '1',
-    rua: 'RUA BETA', numero: '378',
-    bairro: 'VILA PARIS', cidade: 'CONTAGEM', uf: 'MG', cep: '32372090'
-  },
-  {
-    id: 'profi',
-    nome: 'PROFI COMERCIO DE ALIMENTOS LTDA',
-    cnpj: '52139016000183',
-    conta: '398577668', dv: '1',
-    rua: 'RUA BETA', numero: '330',
-    bairro: 'VILA PARIS', cidade: 'CONTAGEM', uf: 'MG', cep: '32372090'
-  }
-];
+const PRODUTOS = {"ACHOCOLATADO CHOCOMINAS CESTA 200G":{"custo":7.169158338,"comA":0.03,"comB":0.02,"margA":0.175,"margB":0.125},"CAFE VACUO BELVEDER 250G L2002":{"custo":12.279158338,"comA":0.03,"comB":0.02,"margA":0.325,"margB":0.275},"CAFE VACUO VILLA RICA TRADICIONAL 500G":{"custo":26.279158338,"comA":0.03,"comB":0.02,"margA":0.155,"margB":0.105},"CD - GLUCOSE EM PO - 25KG":{"custo":5.29,"comA":0.03,"comB":0.02,"margA":0.33,"margB":0.28},"CD - LEITE EM PO DESNATADO IMPORTADO 25KG":{"custo":19.96,"comA":0.015,"comB":0.01,"margA":0.115,"margB":0.065},"CD - LEITE EM PO INTEGRAL IMPORTADO 25KG":{"custo":22.59,"comA":0.015,"comB":0.01,"margA":0.115,"margB":0.065},"CD - MANIMALTO - MALTODEXTRINA 25KG":{"custo":5.29,"comA":0.03,"comB":0.02,"margA":0.265,"margB":0.215},"CD - PERMEADO LITORAL 25KG":{"custo":5.19,"comA":0.02,"comB":0.01,"margA":0.155,"margB":0.105},"CD - SORO DE LEITE EM PO 25KG":{"custo":8.19,"comA":0.02,"comB":0.01,"margA":0.125,"margB":0.075},"COMPOSTO LACTEO HORIZONTE COM MALTODEXTRINA 200G":{"custo":12.989158338,"comA":0.03,"comB":0.02,"margA":0.125,"margB":0.075},"LEITE EM PO DESNATADO HORIZONTE 25KG":{"custo":20.670158338,"comA":0.015,"comB":0.01,"margA":0.115,"margB":0.065},"LEITE EM PO INTEGRAL HORIZONTE 200g":{"custo":25.859158338,"comA":0.015,"comB":0.01,"margA":0.085,"margB":0.055},"LEITE EM PO INTEGRAL HORIZONTE 25KG":{"custo":23.300158338,"comA":0.015,"comB":0.01,"margA":0.115,"margB":0.065},"OKEY LAC ACAI 1 KG":{"custo":14.999158338,"comA":0.03,"comB":0.02,"margA":0.125,"margB":0.075},"OKEY LAC CREAM 25KG":{"custo":16.540158338,"comA":0.03,"comB":0.02,"margA":0.155,"margB":0.105},"OKEY LAC GOURMET 25KG":{"custo":11.820158338,"comA":0.03,"comB":0.02,"margA":0.155,"margB":0.105},"OKEY LAC PANIFICACAO 1KG":{"custo":12.889158338,"comA":0.03,"comB":0.02,"margA":0.125,"margB":0.075},"OKEY LAC PRO 25KG":{"custo":16.540158338,"comA":0.03,"comB":0.02,"margA":0.155,"margB":0.105},"PERMEADO LITORAL 25KG":{"custo":5.900158338,"comA":0.02,"comB":0.01,"margA":0.155,"margB":0.105},"SORO DE LEITE EM PO HORIZONTE 25KG":{"custo":8.900158338,"comA":0.02,"comB":0.01,"margA":0.125,"margB":0.075}};
 
-let empresas = [];
-let idxEmpresa = 0;
-let pagamentos = [];
+const PRAZOS = {"À vista":0.0,"7":0.009,"7/14":0.0125,"14":0.016,"7/14/21":0.016,"15":0.017,"15/30":0.0245,"21":0.023,"14/21":0.0195,"14/21/28":0.023,"21/28":0.0265,"21/28/35":0.03,"28":0.03,"15/30/45":0.032,"28/35":0.0335,"21/28/35/42":0.0335,"30":0.032,"30/35":0.0345,"28/35/42":0.037,"30/35/42":0.0377,"35":0.037,"21/28/35/42/49":0.037,"30/45":0.0395,"35/42":0.0405,"42":0.044,"21/28/35/42/49/56":0.0405,"45":0.047,"30/60":0.047,"28/35/42/49":0.0405,"35/42/49":0.044,"49":0.051,"42/49/56":0.051,"56":0.058,"45/60":0.0545,"60":0.062,"21/28/35/42/49/56/63":0.044};
 
-// ═══════════════════════════════════════════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════════════════════════════════════════
-function entrar() {
-  const v = document.getElementById('campo-senha').value;
-  if (v === 'gmf2026') {
-    sessionStorage.setItem('auth', '1');
-    document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+const FRETES = [{"key":"FOB","label":"FOB","valor":0.0},{"key":"0.20","label":"CIF – R$ 0,20","valor":0.2},{"key":"0.25","label":"CIF – R$ 0,25","valor":0.25},{"key":"0.30","label":"CIF – R$ 0,30","valor":0.3},{"key":"0.35","label":"CIF – R$ 0,35","valor":0.35},{"key":"0.40","label":"CIF – R$ 0,40","valor":0.4},{"key":"0.45","label":"CIF – R$ 0,45","valor":0.45},{"key":"0.50","label":"CIF – R$ 0,50","valor":0.5},{"key":"0.55","label":"CIF – R$ 0,55","valor":0.55},{"key":"0.60","label":"CIF – R$ 0,60","valor":0.6},{"key":"0.65","label":"CIF – R$ 0,65","valor":0.65},{"key":"0.70","label":"CIF – R$ 0,70","valor":0.7},{"key":"0.75","label":"CIF – R$ 0,75","valor":0.75},{"key":"0.80","label":"CIF – R$ 0,80","valor":0.8},{"key":"0.85","label":"CIF – R$ 0,85","valor":0.85},{"key":"0.90","label":"CIF – R$ 0,90","valor":0.9},{"key":"0.95","label":"CIF – R$ 0,95","valor":0.95},{"key":"1.00","label":"CIF – R$ 1,00","valor":1.0},{"key":"1.05","label":"CIF – R$ 1,05","valor":1.05},{"key":"1.10","label":"CIF – R$ 1,10","valor":1.1},{"key":"1.15","label":"CIF – R$ 1,15","valor":1.15},{"key":"1.20","label":"CIF – R$ 1,20","valor":1.2},{"key":"1.25","label":"CIF – R$ 1,25","valor":1.25},{"key":"1.30","label":"CIF – R$ 1,30","valor":1.3},{"key":"1.35","label":"CIF – R$ 1,35","valor":1.35},{"key":"1.40","label":"CIF – R$ 1,40","valor":1.4},{"key":"1.45","label":"CIF – R$ 1,45","valor":1.45},{"key":"1.50","label":"CIF – R$ 1,50","valor":1.5},{"key":"1.55","label":"CIF – R$ 1,55","valor":1.55},{"key":"1.60","label":"CIF – R$ 1,60","valor":1.6},{"key":"1.65","label":"CIF – R$ 1,65","valor":1.65},{"key":"1.70","label":"CIF – R$ 1,70","valor":1.7},{"key":"1.75","label":"CIF – R$ 1,75","valor":1.75},{"key":"1.80","label":"CIF – R$ 1,80","valor":1.8},{"key":"1.85","label":"CIF – R$ 1,85","valor":1.85},{"key":"1.90","label":"CIF – R$ 1,90","valor":1.9},{"key":"1.95","label":"CIF – R$ 1,95","valor":1.95},{"key":"2.00","label":"CIF – R$ 2,00","valor":2.0},{"key":"2.05","label":"CIF – R$ 2,05","valor":2.05},{"key":"2.10","label":"CIF – R$ 2,10","valor":2.1},{"key":"2.15","label":"CIF – R$ 2,15","valor":2.15},{"key":"2.20","label":"CIF – R$ 2,20","valor":2.2},{"key":"2.25","label":"CIF – R$ 2,25","valor":2.25},{"key":"2.30","label":"CIF – R$ 2,30","valor":2.3},{"key":"2.35","label":"CIF – R$ 2,35","valor":2.35},{"key":"2.40","label":"CIF – R$ 2,40","valor":2.4},{"key":"2.45","label":"CIF – R$ 2,45","valor":2.45},{"key":"2.50","label":"CIF – R$ 2,50","valor":2.5},{"key":"2.55","label":"CIF – R$ 2,55","valor":2.55},{"key":"2.60","label":"CIF – R$ 2,60","valor":2.6},{"key":"2.65","label":"CIF – R$ 2,65","valor":2.65},{"key":"2.70","label":"CIF – R$ 2,70","valor":2.7},{"key":"2.75","label":"CIF – R$ 2,75","valor":2.75},{"key":"2.80","label":"CIF – R$ 2,80","valor":2.8},{"key":"2.85","label":"CIF – R$ 2,85","valor":2.85},{"key":"2.90","label":"CIF – R$ 2,90","valor":2.9},{"key":"2.95","label":"CIF – R$ 2,95","valor":2.95},{"key":"3.00","label":"CIF – R$ 3,00","valor":3.0}];
+
+function entrar(){
+  if(document.getElementById('senha').value===SENHA){
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+    iniciar();
   } else {
-    document.getElementById('campo-senha').value = '';
-    document.getElementById('login-erro').classList.add('visivel');
-    document.getElementById('campo-senha').focus();
+    document.getElementById('erroLogin').style.display='block';
+    document.getElementById('senha').value='';
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SEQUENCIAL AUTOMÁTICO
-// ═══════════════════════════════════════════════════════════════════════════
-function chaveSeq() {
-  return 'seq_' + empresas[idxEmpresa].id;
-}
-function lerSeq() {
-  return parseInt(localStorage.getItem(chaveSeq()) || '1');
-}
-function incrementarSeq() {
-  localStorage.setItem(chaveSeq(), String(lerSeq() + 1));
-  atualizarSeq();
-}
-function atualizarSeq() {
-  const n = String(lerSeq()).padStart(7, '0');
-  document.getElementById('seq-preview').textContent = 'CI240_001_' + n + '.REM';
+function sair(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='block';
+  document.getElementById('senha').value='';
+  document.getElementById('erroLogin').style.display='none';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// INICIALIZAÇÃO
-// ═══════════════════════════════════════════════════════════════════════════
-function iniciar() {
-  // Verifica sessão
-  if (sessionStorage.getItem('auth') === '1') {
-    document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  }
+function iniciar(){
+  const selProd = document.getElementById('produto');
+  Object.keys(PRODUTOS).forEach(p=>{
+    const o=document.createElement('option');
+    o.value=p; o.textContent=p;
+    selProd.appendChild(o);
+  });
 
-  // Monta lista de empresas (fixas + extras salvas)
-  empresas = [...EMPRESAS_FIXAS];
-  try {
-    const extras = JSON.parse(localStorage.getItem('empresas_extras') || '[]');
-    extras.forEach(e => {
-      if (!empresas.find(x => x.cnpj === e.cnpj)) empresas.push(e);
-    });
-  } catch (err) {}
+  const selPrazo = document.getElementById('prazo');
+  Object.keys(PRAZOS).forEach(pr=>{
+    const o=document.createElement('option');
+    o.value=pr; o.textContent=pr;
+    selPrazo.appendChild(o);
+  });
 
-  renderizarEmpresas();
-  selecionarEmpresa(0);
-
-  // Drag & drop
-  const zona = document.getElementById('zona-upload');
-  zona.addEventListener('dragover', e => { e.preventDefault(); zona.classList.add('arrastando'); });
-  zona.addEventListener('dragleave', () => zona.classList.remove('arrastando'));
-  zona.addEventListener('drop', e => {
-    e.preventDefault();
-    zona.classList.remove('arrastando');
-    const f = e.dataTransfer.files[0];
-    if (f) processarArquivo(f);
+  const selFrete = document.getElementById('frete');
+  FRETES.forEach(f=>{
+    const o=document.createElement('option');
+    o.value=f.key; o.textContent=f.label;
+    selFrete.appendChild(o);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// EMPRESAS
-// ═══════════════════════════════════════════════════════════════════════════
-function renderizarEmpresas() {
-  const wrap = document.getElementById('btns-empresa');
-  wrap.innerHTML = '';
-  empresas.forEach((e, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'emp-btn' + (i === idxEmpresa ? ' ativo' : '');
-    btn.textContent = e.nome.split(' ').slice(0, 2).join(' ');
-    btn.title = e.nome;
-    btn.onclick = () => selecionarEmpresa(i);
-    wrap.appendChild(btn);
-  });
+function fmt(n){ return 'R$ '+n.toFixed(2).replace('.',','); }
+
+function calcular(){
+  const p  = document.getElementById('produto').value;
+  const pr = document.getElementById('prazo').value;
+  const fr = document.getElementById('frete').value;
+  const res= document.getElementById('resultado');
+
+  if(!p||!pr||!fr){res.style.display='none';return;}
+
+  const prod = PRODUTOS[p];
+  const taxa = PRAZOS[pr];
+  const freteObj = FRETES.find(f=>f.key===fr);
+  if(!prod || taxa===undefined || !freteObj){res.style.display='none';return;}
+
+  const base = prod.custo + freteObj.valor;
+  const denomA = 1 - taxa - prod.comA - prod.margA;
+  const denomB = 1 - taxa - prod.comB - prod.margB;
+  if(denomA<=0 || denomB<=0){res.style.display='none';return;}
+
+  const precoA = base/denomA;
+  const precoB = base/denomB;
+
+  document.getElementById('precoA').textContent = fmt(precoA);
+  document.getElementById('precoB').textContent = fmt(precoB);
+  document.getElementById('comA').textContent   = Math.round(prod.comA*100)+'%';
+  document.getElementById('comB').textContent   = Math.round(prod.comB*100)+'%';
+  res.style.display='block';
 }
-
-function selecionarEmpresa(i) {
-  idxEmpresa = i;
-  renderizarEmpresas();
-  const e = empresas[i];
-  document.getElementById('info-nome').textContent = e.nome;
-  document.getElementById('info-cnpj').textContent = formatarCNPJ(e.cnpj);
-  document.getElementById('info-conta').textContent = e.conta + '-' + e.dv;
-  atualizarSeq();
-}
-
-function formatarCNPJ(c) {
-  return c.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-}
-
-function abrirModal()  { document.getElementById('modal').classList.add('aberto'); }
-function fecharModal() { document.getElementById('modal').classList.remove('aberto'); }
-
-function salvarEmpresa() {
-  const nome  = document.getElementById('m-nome').value.trim().toUpperCase();
-  const cnpj  = document.getElementById('m-cnpj').value.replace(/\D/g, '');
-  const conta = document.getElementById('m-conta').value.replace(/\D/g, '');
-  const dv    = document.getElementById('m-dv').value.trim() || '0';
-  if (!nome || cnpj.length !== 14 || !conta) { alert('Preencha todos os campos corretamente.'); return; }
-  const nova = { id: 'emp' + Date.now(), nome, cnpj, conta, dv, rua: '', numero: '0', bairro: '', cidade: '', uf: '', cep: '' };
-  empresas.push(nova);
-  const extras = empresas.filter(e => !EMPRESAS_FIXAS.find(f => f.cnpj === e.cnpj));
-  localStorage.setItem('empresas_extras', JSON.stringify(extras));
-  renderizarEmpresas();
-  selecionarEmpresa(empresas.length - 1);
-  fecharModal();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// IMPORTAR PLANILHA
-// ═══════════════════════════════════════════════════════════════════════════
-
-// Aceita número (1-5) ou texto
-const MAPA_TIPO = {
-  '1':'01','2':'02','3':'03','4':'04','5':'05',
-  '01':'01','02':'02','03':'03','04':'04','05':'05',
-  'telefone':'01','celular':'01','phone':'01','tel':'01',
-  'email':'02','e-mail':'02','e_mail':'02',
-  'cpf_cnpj':'03','cpfcnpj':'03','cpf':'03','cnpj':'03','documento':'03',
-  'aleatoria':'04','aleatorio':'04','aleatório':'04','evp':'04','chave aleatoria':'04',
-  'dados_bancarios':'05','dados bancarios':'05','banco':'05','conta':'05'
-};
-
-const LABEL_TIPO = {
-  '01':'Telefone','02':'E-mail','03':'CPF/CNPJ','04':'Aleatória','05':'Dados bancários'
-};
-
-function aoSelecionarArquivo(e) {
-  const f = e.target.files[0];
-  if (f) processarArquivo(f);
-}
-
-function processarArquivo(arquivo) {
-  const ext = arquivo.name.split('.').pop().toLowerCase();
-  const reader = new FileReader();
-  reader.onload = ev => {
-    let linhas = [];
-    if (ext === 'csv') {
-      const texto = ev.target.result;
-      const rows  = texto.split(/\r?\n/).filter(l => l.trim());
-      if (!rows.length) return;
-      const sep     = rows[0].includes(';') ? ';' : ',';
-      const headers = rows[0].split(sep).map(h => h.trim().toLowerCase().replace(/["']/g,''));
-      for (let i = 1; i < rows.length; i++) {
-        const vals = rows[i].split(sep);
-        const obj  = {};
-        headers.forEach((h, idx) => { obj[h] = (vals[idx] || '').replace(/["']/g, '').trim(); });
-        if (Object.values(obj).some(v => v)) linhas.push(obj);
-      }
-    } else {
-      const wb = XLSX.read(ev.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      linhas = raw.map(r => {
-        const n = {};
-        Object.keys(r).forEach(k => { n[k.toLowerCase().trim()] = String(r[k]).trim(); });
-        return n;
-      });
-    }
-    interpretarLinhas(linhas);
-  };
-  if (ext === 'csv') reader.readAsText(arquivo, 'UTF-8');
-  else               reader.readAsArrayBuffer(arquivo);
-}
-
-function interpretarLinhas(linhas) {
-  pagamentos = [];
-  let somaValor = 0, qtdErro = 0;
-
-  for (const r of linhas) {
-    const nome   = (r['nome_favorecido'] || r['nome'] || '').toString().toUpperCase().trim();
-    const tipoRaw= (r['tipo_chave']      || r['tipo'] || '').toString().toLowerCase().trim();
-    const tipo   = MAPA_TIPO[tipoRaw] || '03';
-
-    // chave_pix pode ser usada diretamente; para tipo 03, aceita o próprio CPF/CNPJ como chave
-    const docRaw = (r['cpf_cnpj_favorecido'] || r['cpf_cnpj'] || r['cpf'] || r['cnpj'] || '').toString().replace(/\D/g,'');
-    let chave    = (r['chave_pix'] || r['chave'] || '').toString().trim();
-    if (!chave && tipo === '03' && docRaw) chave = docRaw;
-
-    const valorStr = (r['valor'] || '0').toString().replace(/[^\d,\.]/g,'').replace(',','.');
-    const valor    = parseFloat(valorStr) || 0;
-
-    const dataRaw  = (r['data_pagamento'] || r['data'] || '').toString().replace(/\D/g,'');
-    const data     = dataRaw.length === 8 ? dataRaw : hoje();
-
-    const ref = (r['referencia'] || r['ref'] || '').toString().trim().substring(0, 20);
-
-    let erro = '';
-    if (!nome)                           erro = 'Nome ausente';
-    else if (!chave && tipo !== '05')    erro = 'Chave Pix ausente';
-    else if (valor <= 0)                 erro = 'Valor inválido';
-
-    if (!erro) somaValor += valor; else qtdErro++;
-    if (nome || chave || docRaw) pagamentos.push({ nome, tipo, chave, doc: docRaw, valor, data, ref, erro });
-  }
-
-  renderizarTabela();
-  renderizarResumo(somaValor, qtdErro);
-  document.getElementById('btn-gerar').disabled = pagamentos.filter(p => !p.erro).length === 0;
-}
-
-function renderizarTabela() {
-  const tbody = document.getElementById('tabela-corpo');
-  tbody.innerHTML = '';
-  pagamentos.forEach((p, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td class="td-mono">' + (i+1) + '</td>' +
-      '<td>' + (p.nome || '—') + '</td>' +
-      '<td><span class="tipo-badge">' + (LABEL_TIPO[p.tipo] || p.tipo) + '</span></td>' +
-      '<td class="td-mono">' + (p.chave || '—') + '</td>' +
-      '<td class="td-mono">' + formatarDoc(p.doc) + '</td>' +
-      '<td class="td-valor">R$ ' + p.valor.toFixed(2).replace('.', ',') + '</td>' +
-      '<td class="td-mono">' + formatarData(p.data) + '</td>' +
-      '<td class="' + (p.erro ? 'td-erro' : 'td-ok') + '">' + (p.erro || '✓') + '</td>';
-    tbody.appendChild(tr);
-  });
-  document.getElementById('tabela-wrap').classList.add('visivel');
-}
-
-function renderizarResumo(soma, erros) {
-  const qtd = pagamentos.length;
-  document.getElementById('r-total').textContent = qtd;
-  document.getElementById('r-ok').textContent    = qtd - erros;
-  document.getElementById('r-erro').textContent  = erros;
-  document.getElementById('r-valor').textContent = 'R$ ' + soma.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-  document.getElementById('resumo').classList.add('visivel');
-}
-
-function formatarDoc(d) {
-  if (!d) return '—';
-  if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-  return d;
-}
-function formatarData(d) {
-  if (!d || d.length !== 8) return d || '—';
-  return d.slice(0,2) + '/' + d.slice(2,4) + '/' + d.slice(4,8);
-}
-function hoje() {
-  const d = new Date();
-  return String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0') + d.getFullYear();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// GERAR CNAB 240
-// ═══════════════════════════════════════════════════════════════════════════
-function a(str, tam) { return String(str || '').padEnd(tam, ' ').substring(0, tam); }
-function n(str, tam) { return String(str || '').replace(/\D/g,'').padStart(tam,'0').slice(-tam); }
-function v(val, tam) { return String(Math.round(parseFloat(val||0)*100)).padStart(tam,'0').slice(-tam); }
-
-function gerarCNAB() {
-  const emp   = empresas[idxEmpresa];
-  const validos = pagamentos.filter(p => !p.erro);
-  if (!validos.length) { mostrarMsg('Nenhum pagamento válido.', 'err'); return; }
-
-  const seqN  = String(lerSeq()).padStart(7, '0');
-  const hj    = hoje();
-  const agora = new Date();
-  const hora  = String(agora.getHours()).padStart(2,'0') + String(agora.getMinutes()).padStart(2,'0') + String(agora.getSeconds()).padStart(2,'0');
-  const LOTE  = '0001';
-  const linhas = [];
-
-  // ── Header arquivo (240 chars) ──
-  let ha = '';
-  ha += '077';                              // 1-3   banco
-  ha += '0000';                             // 4-7   lote
-  ha += '0';                                // 8     tipo registro
-  ha += ' '.repeat(9);                      // 9-17
-  ha += '2';                                // 18    tipo doc (CNPJ)
-  ha += emp.cnpj.padStart(14, ' ');         // 19-32 CNPJ
-  ha += ' '.repeat(20);                     // 33-52
-  ha += '00001';                            // 53-57 agência
-  ha += '9';                                // 58    dv agência
-  ha += emp.conta.padStart(12, '0');        // 59-70 conta
-  ha += emp.dv.padStart(1, '0');            // 71    dv conta
-  ha += ' ';                                // 72
-  ha += a(emp.nome, 30);                    // 73-102 nome empresa
-  ha += a('BANCO INTER', 30);              // 103-132 nome banco
-  ha += ' '.repeat(10);                     // 133-142
-  ha += '1';                                // 143   remessa
-  ha += hj;                                 // 144-151 data DDMMAAAA
-  ha += hora;                               // 152-157 hora HHMMSS
-  ha += seqN.substring(0,6).padStart(6,'0');// 158-163 seq arquivo
-  ha += '107';                              // 164-166 versão layout
-  ha += '01600';                            // 167-171 densidade
-  ha += ' '.repeat(20);                     // 172-191
-  ha += ' '.repeat(20);                     // 192-211
-  ha += ' '.repeat(29);                     // 212-240
-  linhas.push(ha);
-
-  // ── Header lote (240 chars) ──
-  let hl = '';
-  hl += '077';                              // 1-3
-  hl += LOTE;                               // 4-7
-  hl += '1';                                // 8
-  hl += 'C';                                // 9
-  hl += '20';                               // 10-11 tipo serviço pagamento fornecedor
-  hl += '45';                               // 12-13 forma lançamento Pix
-  hl += '046';                              // 14-16 versão layout lote
-  hl += ' ';                                // 17
-  hl += '2';                                // 18
-  hl += emp.cnpj.padStart(14, ' ');         // 19-32
-  hl += ' '.repeat(20);                     // 33-52
-  hl += '00001';                            // 53-57
-  hl += '9';                                // 58
-  hl += emp.conta.padStart(12, '0');        // 59-70
-  hl += emp.dv.padStart(1, '0');            // 71
-  hl += ' ';                                // 72
-  hl += a(emp.nome, 30);                    // 73-102
-  hl += a('', 40);                          // 103-142 info genérica
-  hl += a(emp.rua || '', 30);               // 143-172
-  hl += String(emp.numero||'0').padStart(5,'0').substring(0,5); // 173-177
-  hl += a(emp.bairro || '', 15);            // 178-192
-  hl += a(emp.cidade || '', 20);            // 193-212
-  hl += (emp.cep||'').replace(/\D/g,'').padStart(8,'0').substring(0,5); // 213-217
-  hl += (emp.cep||'').replace(/\D/g,'').padEnd(8,'0').substring(5,8);   // 218-220
-  hl += a(emp.uf || '', 2);                 // 221-222
-  hl += ' '.repeat(8);                      // 223-230
-  hl += ' '.repeat(10);                     // 231-240
-  linhas.push(hl);
-
-  let totalCentavos = 0;
-  let seq = 0;
-
-  for (const p of validos) {
-    totalCentavos += Math.round(parseFloat(p.valor || 0) * 100);
-
-    // ── Segmento A (240 chars) ──
-    seq++;
-    let sa = '';
-    sa += '077';                            // 1-3
-    sa += LOTE;                             // 4-7
-    sa += '3';                              // 8
-    sa += String(seq).padStart(5,'0');      // 9-13
-    sa += 'A';                              // 14
-    sa += '0';                              // 15 tipo movimento
-    sa += '00';                             // 16-17 instrução
-    sa += '000';                            // 18-20 câmara
-    sa += '000';                            // 21-23 banco fav
-    sa += '00000';                          // 24-28 agência fav
-    sa += '0';                              // 29 dv ag
-    sa += '0'.repeat(12);                   // 30-41 conta fav
-    sa += '0';                              // 42 dv conta
-    sa += ' ';                              // 43
-    sa += a(p.nome || '', 30);                  // 44-73 nome fav
-    sa += a(p.ref || '', 20);               // 74-93 número doc empresa
-    sa += (p.data||hj).substring(0,8);      // 94-101 data pagamento
-    sa += 'BRL';                            // 102-104
-    sa += '0'.repeat(15);                   // 105-119 qtde moeda
-    sa += v(p.valor, 15);                   // 120-134 valor pagamento
-    sa += ' '.repeat(20);                   // 135-154 doc banco
-    sa += '0'.repeat(8);                    // 155-162 data efetivação retorno
-    sa += '0'.repeat(15);                   // 163-177 valor efetivação retorno
-    sa += (p.doc||'').replace(/\D/g,'').padStart(14,'0').substring(0,14); // 178-191
-    sa += '0'.repeat(8);                    // 192-199 ISPB
-    sa += '01';                             // 200-201 tipo conta corrente
-    sa += ' '.repeat(29);                   // 202-230
-    sa += ' '.repeat(10);                   // 231-240
-    linhas.push(sa);
-
-    // ── Segmento B (240 chars) ──
-    seq++;
-    let sb = '';
-    sb += '077';                            // 1-3
-    sb += LOTE;                             // 4-7
-    sb += '3';                              // 8
-    sb += String(seq).padStart(5,'0');      // 9-13
-    sb += 'B';                              // 14
-    sb += (p.tipo||'03').padEnd(3,' ');     // 15-17 forma de iniciação (alinhado à esquerda)
-    sb += (p.doc||'').replace(/\D/g,'').length <= 11 ? '1' : '2'; // 18
-    sb += (p.doc||'').replace(/\D/g,'').padStart(14,'0').substring(0,14); // 19-32
-    sb += ' '.repeat(35);                   // 33-67 TX ID opcional
-    sb += ' '.repeat(60);                   // 68-127
-    // 128-226: chave Pix para tipos telefone(01), email(02), aleatória(04) e CPF/CNPJ(03)
-    if (['01','02','03','04'].includes(p.tipo)) {
-      sb += a(p.chave || '', 99);
-    } else {
-      sb += ' '.repeat(99);                 // dados bancários: sem chave
-    }
-    sb += ' '.repeat(6);                    // 227-232
-    sb += '0'.repeat(8);                    // 233-240 ISPB favorecido
-    linhas.push(sb);
-  }
-
-  // ── Trailer lote (240 chars) ──
-  let tl = '';
-  tl += '077';
-  tl += LOTE;
-  tl += '5';
-  tl += ' '.repeat(9);
-  tl += String(seq + 2).padStart(6,'0');    // qtde registros do lote (detalhes + header + trailer)
-  tl += String(totalCentavos).padStart(18,'0');
-  tl += '0'.repeat(18);
-  tl += ' '.repeat(6);
-  tl += ' '.repeat(165);
-  tl += ' '.repeat(10);
-  linhas.push(tl);
-
-  // ── Trailer arquivo (240 chars) ──
-  let ta = '';
-  ta += '077';
-  ta += '9999';
-  ta += '9';
-  ta += ' '.repeat(9);
-  ta += '000001';                           // 1 lote
-  ta += String(linhas.length + 1).padStart(6,'0'); // total de registros
-  ta += ' '.repeat(211);
-  linhas.push(ta);
-
-  // Validação de tamanho
-  const invalidas = linhas.filter(l => l.length !== 240);
-  if (invalidas.length) {
-    mostrarMsg('Erro interno: ' + invalidas.length + ' linha(s) com tamanho incorreto.', 'err');
-    console.error(invalidas.map((l,i) => 'linha ' + i + ': ' + l.length + ' chars'));
-    return;
-  }
-
-  const nomeArq  = 'CI240_001_' + seqN + '.REM';
-  const conteudo = linhas.join('\r\n') + '\r\n';
-  baixarTexto(conteudo, nomeArq);
-
-  const totalFmt = (totalCentavos / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-  mostrarMsg('✓ ' + nomeArq + ' gerado — ' + validos.length + ' pagamento(s) — R$ ' + totalFmt, 'ok');
-  incrementarSeq();
-}
-
-function baixarTexto(texto, nome) {
-  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = nome; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
-}
-
-function mostrarMsg(txt, tipo) {
-  const el = document.getElementById('msg');
-  el.textContent = txt;
-  el.className = 'msg ' + tipo;
-}
-
-function limpar() {
-  pagamentos = [];
-  document.getElementById('tabela-corpo').innerHTML = '';
-  document.getElementById('tabela-wrap').classList.remove('visivel');
-  document.getElementById('resumo').classList.remove('visivel');
-  document.getElementById('btn-gerar').disabled = true;
-  document.getElementById('input-arquivo').value = '';
-  document.getElementById('msg').className = 'msg';
-}
-
-function baixarModelo() {
-  const cabecalho = ['nome_favorecido','tipo_chave','chave_pix','cpf_cnpj_favorecido','valor','data_pagamento','referencia'];
-  const exemplos  = [
-    ['JOAO DA SILVA',   '2', 'joao@email.com',                        '12345678901',    '150.00',  '04062026', 'REF001'],
-    ['MARIA LTDA',      '3', '12345678000195',                        '12345678000195', '2500.00', '04062026', 'REF002'],
-    ['PEDRO SOUZA',     '1', '+5531999990000',                        '98765432100',    '80.50',   '05062026', 'REF003'],
-    ['LUCAS TECH',      '4', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '11223344556',    '320.00',  '05062026', 'REF004'],
-  ];
-  const ws = XLSX.utils.aoa_to_sheet([cabecalho, ...exemplos]);
-  ws['!cols'] = cabecalho.map(() => ({ wch: 42 }));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Pagamentos');
-  XLSX.writeFile(wb, 'modelo_pagamentos_pix.xlsx');
-}
-
-// Inicia tudo
-iniciar();
 </script>
 </body>
 </html>
